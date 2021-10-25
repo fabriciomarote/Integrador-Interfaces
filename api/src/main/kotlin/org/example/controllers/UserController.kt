@@ -87,7 +87,7 @@ class UserController(private val noteService: NoteService, private val tokenJWT:
         val note = noteService.getNote(userId, noteId)
         try {
                noteService.editNote(userId, noteId, draft)
-            val noteEdited = SimpleNote(note.id, draft.title, draft.description)
+            val noteEdited = NoteBody(note.id, draft.title, draft.description, Transform.dateToFormattedDate(note.lastModifiedDate))
             ctx.status(200).json(noteEdited)
         } catch (e: UserException) {
             ctx.status(401).json({})
@@ -101,7 +101,8 @@ class UserController(private val noteService: NoteService, private val tokenJWT:
         val user = noteService.getUser(userId)
         try {
             noteService.removeNote(userId, noteId)
-            ctx.status(200).json(user)
+            val userBody = UserBody(user.id, user.email, user.image, user.password, user.displayName, Transform.notesToSimpleNotes(user.notes))
+            ctx.status(200).json(userBody)
         } catch (e: UserException) {
             ctx.status(401).json({})
         }
